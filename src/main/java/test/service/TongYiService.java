@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import test.config.im.TongYiConfig;
+import test.config.TongYiConfig;
 import test.entity.TongYiRequest;
 import test.entity.TongYiResponse;
 

@@ -1,12 +1,11 @@
 spring:
   application:
     name: Ai-Access
-
 server:
   port: 8081
 
 tongyi:
   api:
-    key: "sk-b3018fa00a0d4932af76d7615a0bed77"  # 在阿里云百炼平台获取
+    key: "apiKey"  # 在阿里云百炼平台获取（有免费token额度）
     url: "https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation"
     model: "qwen-turbo"  # 也可以使用 qwen-plus, qwen-max 等
