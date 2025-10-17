@@ -1,0 +1,703 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">AI博客简介生成器</title>
+
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.0/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/font-awesome/6.4.0/css/all.min.css}">
+
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --neon-blue: #00f3ff;
+            --neon-purple: #b967ff;
+            --neon-pink: #ff2d75;
+            --dark-bg: #0a0a0a;
+            --card-bg: rgba(30, 30, 40, 0.8);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: #e0e0ff;
+            --text-muted: #a0a0c0;
+        }
+
+        body {
+            background: var(--dark-bg);
+            background-image:
+                    radial-gradient(circle at 10% 20%, rgba(28, 58, 173, 0.15) 0%, transparent 20%),
+                    radial-gradient(circle at 90% 80%, rgba(200, 50, 255, 0.15) 0%, transparent 20%);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .cyber-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .cyber-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+            position: relative;
+        }
+
+        .cyber-title {
+            font-family: 'Arial Black', 'Impact', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 243, 255, 0.4);
+            margin-bottom: 1rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .cyber-subtitle {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+            opacity: 0.9;
+        }
+
+        .cyber-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+            color: var(--text-primary);
+        }
+
+        .cyber-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 243, 255, 0.3);
+            border-color: rgba(0, 243, 255, 0.4);
+        }
+
+        .cyber-card h3, .cyber-card h4 {
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .cyber-card label {
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .cyber-input {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: var(--text-primary);
+            padding: 12px 15px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 1rem;
+        }
+
+        .cyber-input::placeholder {
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+
+        .cyber-input:focus {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .cyber-btn {
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+            border: none;
+            border-radius: 10px;
+            color: #000;
+            font-weight: 700;
+            padding: 12px 30px;
+            margin: 0.5rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Arial', sans-serif;
+            font-size: 0.9rem;
+        }
+
+        .cyber-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 25px rgba(0, 243, 255, 0.5);
+            color: #000;
+        }
+
+        .cyber-btn:disabled {
+            opacity: 0.6;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .result-container {
+            background: rgba(20, 20, 30, 0.9);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            min-height: 150px;
+            position: relative;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-primary);
+        }
+
+        .ai-thinking {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .pulse-dots {
+            display: inline-block;
+        }
+
+        .pulse-dots span {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--neon-blue);
+            margin: 0 4px;
+            animation: pulse 1.4s ease-in-out infinite both;
+        }
+
+        .pulse-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .pulse-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes pulse {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        .tech-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                    linear-gradient(rgba(0, 243, 255, 0.08) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0, 243, 255, 0.08) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .neon-border {
+            position: relative;
+        }
+
+        .neon-border::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple), var(--neon-blue));
+            border-radius: 17px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .cyber-card:hover .neon-border::before {
+            opacity: 0.3;
+        }
+
+        .stats-panel {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: 'Arial Black', sans-serif;
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            font-weight: 500;
+        }
+
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-element {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, rgba(0, 243, 255, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 25s infinite linear;
+            opacity: 0.6;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+            50% { transform: translate(50px, 50px) rotate(180deg) scale(1.1); }
+            100% { transform: translate(0, 0) rotate(360deg) scale(1); }
+        }
+
+        /* 改善文本可读性 */
+        .text-muted {
+            color: var(--text-muted) !important;
+            opacity: 0.8;
+        }
+
+        .text-success {
+            color: #00ff88 !important;
+        }
+
+        .text-danger {
+            color: #ff4444 !important;
+        }
+
+        /* AI生成内容样式 */
+        .ai-generated-content {
+            color: var(--text-primary);
+            line-height: 1.7;
+            font-size: 1.05rem;
+        }
+
+        .ai-generated-content .badge {
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+            color: #000;
+            font-weight: 600;
+        }
+
+        /* 改善表单元素可见性 */
+        .form-control:focus {
+            color: var(--text-primary);
+        }
+
+        select.form-control {
+            color: var(--text-primary);
+        }
+
+        select.form-control option {
+            background: var(--dark-bg);
+            color: var(--text-primary);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .cyber-title {
+                font-size: 2rem;
+            }
+
+            .cyber-container {
+                padding: 10px;
+            }
+
+            .cyber-card {
+                padding: 1.5rem;
+            }
+
+            .stat-value {
+                font-size: 1.8rem;
+            }
+        }
+
+        /* 改善小文本的可读性 */
+        small {
+            color: var(--text-muted);
+            opacity: 0.9;
+        }
+
+        /* 改善链接和按钮文本 */
+        a {
+            color: var(--neon-blue);
+        }
+
+        /* 改善滚动条（Webkit浏览器） */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--neon-blue);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--neon-purple);
+        }
+    </style>
+</head>
+<body>
+<!-- 科技网格背景 -->
+<div class="tech-grid"></div>
+
+<!-- 浮动元素 -->
+<div class="floating-elements">
+    <div class="floating-element" style="top: 10%; left: 5%; animation-delay: 0s;"></div>
+    <div class="floating-element" style="top: 60%; right: 10%; animation-delay: -5s;"></div>
+    <div class="floating-element" style="bottom: 20%; left: 20%; animation-delay: -10s;"></div>
+    <div class="floating-element" style="top: 30%; right: 20%; animation-delay: -15s;"></div>
+</div>
+
+<div class="cyber-container">
+    <!-- 头部 -->
+    <div class="cyber-header">
+        <h1 class="cyber-title">
+            <i class="fas fa-robot me-3"></i>
+            AI博客简介生成器
+        </h1>
+        <p class="cyber-subtitle">
+            基于通义千问大模型 · 智能内容创作 · 实时AI交互
+        </p>
+    </div>
+
+    <div class="row">
+        <!-- 输入面板 -->
+        <div class="col-lg-6">
+            <div class="cyber-card neon-border">
+                <h3 class="mb-4">
+                    <i class="fas fa-keyboard me-2"></i>
+                    创作参数设置
+                </h3>
+
+                <form id="blogForm">
+                    <div class="mb-3">
+                        <label class="form-label">博客标题</label>
+                        <input type="text" class="form-control cyber-input" id="title"
+                               placeholder="输入吸引人的博客标题..." required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">关键词</label>
+                        <input type="text" class="form-control cyber-input" id="keywords"
+                               placeholder="用逗号分隔的关键词...">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">内容大纲</label>
+                        <textarea class="form-control cyber-input" id="contentOutline"
+                                  rows="3" placeholder="描述博客的主要内容结构..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">简介长度</label>
+                        <select class="form-control cyber-input" id="targetLength">
+                            <option value="100">简短 (约100字)</option>
+                            <option value="200" selected>中等 (约200字)</option>
+                            <option value="300">详细 (约300字)</option>
+                        </select>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="button" class="cyber-btn" onclick="generateSummary()" id="generateBtn">
+                            <i class="fas fa-bolt me-2"></i>
+                            生成AI简介
+                        </button>
+                        <button type="button" class="cyber-btn" onclick="clearForm()" style="background: linear-gradient(45deg, #6c757d, #495057);">
+                            <i class="fas fa-eraser me-2"></i>
+                            清空
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 统计面板 -->
+            <div class="cyber-card">
+                <h4><i class="fas fa-chart-bar me-2"></i>系统统计</h4>
+                <div class="stats-panel">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalRequests">0</div>
+                        <div class="stat-label">总请求数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="successRate">100%</div>
+                        <div class="stat-label">成功率</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="avgResponseTime">0s</div>
+                        <div class="stat-label">平均响应</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 输出面板 -->
+        <div class="col-lg-6">
+            <div class="cyber-card neon-border">
+                <h3 class="mb-4">
+                    <i class="fas fa-magic me-2"></i>
+                    AI生成结果
+                </h3>
+
+                <!-- AI思考动画 -->
+                <div class="ai-thinking" id="thinkingAnimation">
+                    <div class="pulse-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <p class="mt-3">AI正在思考中，请稍候...</p>
+                </div>
+
+                <!-- 结果显示 -->
+                <div class="result-container" id="resultContainer">
+                    <div id="resultContent" class="text-muted">
+                        <i class="fas fa-comment-dots me-2"></i>
+                        在这里查看AI生成的精彩博客简介...
+                    </div>
+                </div>
+
+                <!-- 操作按钮 -->
+                <div class="mt-3 text-center" id="actionButtons" style="display: none;">
+                    <button class="cyber-btn" onclick="copyToClipboard()">
+                        <i class="fas fa-copy me-2"></i>
+                        复制内容
+                    </button>
+                    <button class="cyber-btn" onclick="regenerate()">
+                        <i class="fas fa-sync-alt me-2"></i>
+                        重新生成
+                    </button>
+                    <button class="cyber-btn" onclick="downloadText()">
+                        <i class="fas fa-download me-2"></i>
+                        下载文本
+                    </button>
+                </div>
+            </div>
+
+            <!-- API状态 -->
+            <div class="cyber-card">
+                <h4><i class="fas fa-server me-2"></i>系统状态</h4>
+                <div id="apiStatus" class="text-success">
+                    <i class="fas fa-circle me-2"></i>
+                    API连接正常
+                </div>
+                <div class="mt-2">
+                    <small class="text-muted">模型: <span id="modelInfo">qwen-turbo</span></small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script th:src="@{/webjars/jquery/3.6.0/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/5.3.0/js/bootstrap.bundle.min.js}"></script>
+
+
+<script>
+    let requestCount = 0;
+    let successCount = 0;
+    let totalResponseTime = 0;
+
+    async function generateSummary() {
+        const title = document.getElementById('title').value;
+        const keywords = document.getElementById('keywords').value;
+        const contentOutline = document.getElementById('contentOutline').value;
+        const targetLength = document.getElementById('targetLength').value;
+
+        if (!title.trim()) {
+            alert('请输入博客标题');
+            return;
+        }
+
+        // 显示思考动画
+        document.getElementById('thinkingAnimation').style.display = 'block';
+        document.getElementById('resultContent').innerHTML = '';
+        document.getElementById('actionButtons').style.display = 'none';
+        document.getElementById('generateBtn').disabled = true;
+
+        const startTime = Date.now();
+        requestCount++;
+
+        try {
+            const response = await fetch('/api/blog/generate-summary', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    title: title,
+                    keywords: keywords,
+                    contentOutline: contentOutline,
+                    targetLength: parseInt(targetLength)
+                })
+            });
+
+            const data = await response.json();
+            const endTime = Date.now();
+            const responseTime = (endTime - startTime) / 1000;
+            totalResponseTime += responseTime;
+
+            // 更新统计
+            updateStats(responseTime);
+
+            if (data.success) {
+                successCount++;
+                displayResult(data.data);
+                showSuccessAnimation();
+            } else {
+                throw new Error(data.message || '生成失败');
+            }
+
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('resultContent').innerHTML =
+                `<div class="text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        生成失败: ${error.message}
+                    </div>`;
+        } finally {
+            document.getElementById('thinkingAnimation').style.display = 'none';
+            document.getElementById('actionButtons').style.display = 'block';
+            document.getElementById('generateBtn').disabled = false;
+        }
+    }
+
+    function displayResult(content) {
+        const resultDiv = document.getElementById('resultContent');
+        resultDiv.innerHTML = `
+                <div class="ai-generated-content">
+                    <div style="line-height: 1.6; color: #e0e0e0;">
+                        ${content.replace(/\n/g, '<br>')}
+                    </div>
+                </div>
+            `;
+
+        // 添加打字机效果
+        typewriterEffect(resultDiv);
+    }
+
+    function typewriterEffect(element) {
+        const text = element.textContent || element.innerText;
+        element.innerHTML = '';
+        let i = 0;
+
+        function type() {
+            if (i < text.length) {
+                element.innerHTML += text.charAt(i);
+                i++;
+                setTimeout(type, 20);
+            }
+        }
+        type();
+    }
+
+    function showSuccessAnimation() {
+        const resultContainer = document.getElementById('resultContainer');
+        resultContainer.style.animation = 'none';
+        setTimeout(() => {
+            resultContainer.style.animation = 'pulse 0.5s ease-in-out';
+        }, 10);
+    }
+
+    function updateStats(responseTime) {
+        document.getElementById('totalRequests').textContent = requestCount;
+        document.getElementById('successRate').textContent =
+            Math.round((successCount / requestCount) * 100) + '%';
+        document.getElementById('avgResponseTime').textContent =
+            (totalResponseTime / requestCount).toFixed(1) + 's';
+    }
+
+    function clearForm() {
+        document.getElementById('blogForm').reset();
+        document.getElementById('resultContent').innerHTML =
+            '<i class="fas fa-comment-dots me-2"></i>在这里查看AI生成的精彩博客简介...';
+        document.getElementById('actionButtons').style.display = 'none';
+    }
+
+    function copyToClipboard() {
+        const content = document.getElementById('resultContent').textContent;
+        navigator.clipboard.writeText(content).then(() => {
+            alert('内容已复制到剪贴板！');
+        });
+    }
+
+    function regenerate() {
+        generateSummary();
+    }
+
+    function downloadText() {
+        const content = document.getElementById('resultContent').textContent;
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'AI生成的博客简介.txt';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    async function checkQuota() {
+        try {
+            const response = await fetch('/api/quota/remaining');
+            const data = await response.json();
+            alert(data.data);
+        } catch (error) {
+            alert('获取额度信息失败');
+        }
+    }
+
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 AI博客简介生成器已启动');
+    });
+</script>
+</body>
+</html>
+
+

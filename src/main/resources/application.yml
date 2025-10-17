@@ -1,6 +1,17 @@
 spring:
   application:
     name: Ai-Access
+  web:
+    resources:
+      static-locations: classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/,classpath:/public/
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    cache: false  # 开发时关闭缓存
+
+
 server:
   port: 8081
 
